@@ -1,5 +1,4 @@
-﻿using System;
-using SimpleStateMachine.Definitions;
+﻿using System.Linq;
 
 namespace SimpleStateMachine.Engine
 {
@@ -14,7 +13,8 @@ namespace SimpleStateMachine.Engine
 
         public (TState nextState, TOutput[] outputs) TransitionFrom(TState state, TInput input)
         {
-            return (_states.NextState(state, input), Array.Empty<TOutput>());
+            var (nextState, funcs) = _states.NextState(state, input);
+            return (nextState, funcs.Select(f=>f(input)).ToArray());
         }
     }
 }

@@ -26,21 +26,21 @@ namespace SimpleStateMachine.Dsl
 
         public StateDsl<TState, TInput, TOutput> State(TState stateId) => new(stateId,_stateMachineDsl);
 
-        public StateDsl<TState, TInput, TOutput> OnEntry(List<Func<TInput, TOutput>> funcs)
+        public StateDsl<TState, TInput, TOutput> OnEntry(params Func<TInput, TOutput>[] funcs)
         {
-            MyStateDef.OnEntry = new ExecutionDef<TInput, TOutput>(funcs.AsReadOnly());
+            MyStateDef.OnEntry = new ExecutionDef<TInput, TOutput>(funcs);
             return this;
         }
         
-        public StateDsl<TState, TInput, TOutput> OnState(List<Func<TInput, TOutput>> funcs)
+        public StateDsl<TState, TInput, TOutput> OnState(params Func<TInput, TOutput>[] funcs)
         {
-            MyStateDef.OnState = new ExecutionDef<TInput, TOutput>(funcs.AsReadOnly());
+            MyStateDef.OnState = new ExecutionDef<TInput, TOutput>(funcs);
             return this;
         }
         
-        public StateDsl<TState, TInput, TOutput> OnExit(List<Func<TInput, TOutput>> funcs)
+        public StateDsl<TState, TInput, TOutput> OnExit(params Func<TInput, TOutput>[] funcs)
         {
-            MyStateDef.OnExit = new ExecutionDef<TInput, TOutput>(funcs.AsReadOnly());
+            MyStateDef.OnExit = new ExecutionDef<TInput, TOutput>(funcs);
             return this;
         }
         

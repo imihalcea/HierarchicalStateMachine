@@ -14,40 +14,16 @@ namespace SimpleStateMachine.Engine
             _compiledStates = new Dictionary<TState, CompiledState<TState, TInput, TOutput>>();
             foreach (var stateDef in stateMachineDef.States)
             {
-                _compiledStates.Add(stateDef.Id, new CompiledState<TState, TInput, TOutput>(stateDef));
+                _compiledStates.Add(stateDef.Id, new CompiledState<TState, TInput, TOutput>(stateDef, stateMachineDef));
             }
         }
 
-        public TState NextState(TState from, TInput input)
+        public (TState,IReadOnlyList<Func<TInput,TOutput>>) NextState(TState from, TInput input)
         {
             Debug.Assert(_compiledStates.ContainsKey(from),$"No transitions defined for state {from.ToString()}");
-            return _compiledStates[from].NextState(input);
-        }
-    }
-
-    public class CompiledState<TState, TInput, TOutput>
-    {
-        private readonly List<(TState to, Predicate<TInput> predicate)> _transitions;
-        private readonly TState _id;
-
-        public CompiledState(StateDef<TState, TInput, TOutput> def)
-        {
-            _id = def.Id;
-            _transitions = new List<(TState to, Predicate<TInput> predicate)>();
-            foreach (var transitionDef in def.Transitions)
-            {
-                _transitions.Add((transitionDef.To,transitionDef.Predicate));
-            }
-            
-        }
-
-        public TState NextState(TInput input)
-        {
-            foreach (var transition in _transitions)
-            {
-                if (transition.predicate(input)) return transition.to;
-            }
-            return _id;
+            var nextState = _compiledStates[@from].NextState(input);
+            var funcs = _compiledStates[@from].TransitionFuncs(nextState);
+            return (nextState,funcs);
         }
     }
 }

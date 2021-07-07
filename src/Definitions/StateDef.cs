@@ -11,6 +11,10 @@ namespace SimpleStateMachine.Definitions
         {
             Id = id;
             _children = new List<StateDef<TState, TInput, TOutput>>();
+            OnExit = new ExecutionDef<TInput, TOutput>(Array.Empty<Func<TInput, TOutput>>());
+            OnEntry = new ExecutionDef<TInput, TOutput>(Array.Empty<Func<TInput, TOutput>>());
+            OnState = new ExecutionDef<TInput, TOutput>(Array.Empty<Func<TInput, TOutput>>());
+
         }
 
         public TState Id { get; internal set; }
