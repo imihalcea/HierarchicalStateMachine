@@ -43,17 +43,23 @@ namespace SimpleStateMachine.Engine
                 _transitionFuncs.AddOrUpdate(transitionDef.To,_=>CompileTransitionFuncs(transitionDef), (_,l)=>l.AddRange(CompileTransitionFuncs(transitionDef).ToArray()));
             }
             
-            //_transitionFuncs.Add(def.Id,def.Id),OnStateFuncs(def));
+            _transitionFuncs.AddOrUpdate(def.Id, _ => OnStateFuncs(def.Id).ToList(), (_,l)=>l.AddRange(OnStateFuncs(def.Id)));
         }
 
         private List<Func<TInput, TOutput>> CompileTransitionFuncs(TransitionDef<TState, TInput> transitionDef) => 
-            OnExitFuncs(transitionDef.From).Concat(OnEntryFuncs(transitionDef.To)).ToList();
+            OnExitFuncs(transitionDef.From)
+            .Concat(OnEntryFuncs(transitionDef.To))
+            .Concat(OnStateFuncs(transitionDef.To))
+            .ToList();
 
         private IReadOnlyList<Func<TInput, TOutput>> OnExitFuncs(TState stateId) => 
             _stateMachineDef.StateDef(stateId)?.OnExit.Funcs ?? Array.Empty<Func<TInput,TOutput>>();
         
         private IReadOnlyList<Func<TInput, TOutput>> OnEntryFuncs(TState stateId) => 
             _stateMachineDef.StateDef(stateId)?.OnEntry.Funcs ?? Array.Empty<Func<TInput,TOutput>>();
+        
+        private IReadOnlyList<Func<TInput, TOutput>> OnStateFuncs(TState stateId) => 
+            _stateMachineDef.StateDef(stateId)?.OnState.Funcs ?? Array.Empty<Func<TInput,TOutput>>();
 
     }
 }
