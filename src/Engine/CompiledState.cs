@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using SimpleStateMachine.Definitions;
 using SimpleStateMachine.Helpers;
@@ -39,7 +40,8 @@ namespace SimpleStateMachine.Engine
         {
             foreach (var transitionDef in def.Transitions)
             {
-                _transitions.Add((transitionDef.To, transitionDef.Predicate));
+                var targetStateDef = Compiler.InitialState(_stateMachineDef.StateDef(transitionDef.To));
+                _transitions.Add((targetStateDef.Id, transitionDef.Predicate));
                 _transitionFuncs.AddOrUpdate(transitionDef.To,_=>CompileTransitionFuncs(transitionDef), (_,l)=>l.AddRange(CompileTransitionFuncs(transitionDef).ToArray()));
             }
             

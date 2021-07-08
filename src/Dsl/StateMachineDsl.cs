@@ -31,6 +31,11 @@ namespace SimpleStateMachine.Dsl
            _definedStates.Add(stateDef);
         }
 
+        internal StateDef<TState, TInput, TOutput>? GetDefinedState(TState stateId)
+        {
+            return _definedStates.FirstOrDefault(s => stateId!.Equals(s.Id));
+        }
+
 
     }
 }

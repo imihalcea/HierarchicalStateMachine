@@ -1,9 +1,9 @@
 using System.Linq;
 using NUnit.Framework;
 using SimpleStateMachine.Engine;
-using static SimpleStateMachine.Dsl.StateMachineDsl<SimpleStateMachine.Tests.StateMachineTransitionTests.State,int,int>;
-using static SimpleStateMachine.Dsl.TransitionState<SimpleStateMachine.Tests.StateMachineTransitionTests.State,int>;
-using static SimpleStateMachine.Tests.StateMachineTransitionTests.State;
+using static SimpleStateMachine.Dsl.StateMachineDsl<SimpleStateMachine.Tests.State,int,int>;
+using static SimpleStateMachine.Dsl.TransitionState<SimpleStateMachine.Tests.State,int>;
+using static SimpleStateMachine.Tests.State;
 
 namespace SimpleStateMachine.Tests
 {
@@ -65,13 +65,6 @@ namespace SimpleStateMachine.Tests
             var (nextState, outputs) = sm.TransitionFrom(currentState, input);
             Assert.AreEqual(expectedState,nextState);
             Assert.True(expectedOutput.SequenceEqual(outputs));
-        }
-        
-        
-        
-        public enum State
-        {
-            A,B,C
         }
     }
 }

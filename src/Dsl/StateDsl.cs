@@ -1,12 +1,11 @@
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using SimpleStateMachine.Definitions;
 
 namespace SimpleStateMachine.Dsl
 {
-    public class StateDsl<TState, TInput, TOutput>
+    public class StateDsl<TState, TInput, TOutput> where TState:notnull
     {
         private readonly TState _stateId;
         
@@ -55,6 +54,20 @@ namespace SimpleStateMachine.Dsl
         {
             var initialState = _stateMachineDsl._definedStates.First(s => s.Id.Equals(_stateMachineDsl._initialStateId));
             return new StateMachineDef<TState, TInput, TOutput>(initialState, _stateMachineDsl._definedStates);
+        }
+
+        public StateDsl<TState, TInput, TOutput> InitialSubStateOf(TState parentState)
+        {
+            MyStateDef.IsInitialSubState = true;
+            return SubStateOf(parentState);
+        }
+
+        public StateDsl<TState, TInput, TOutput> SubStateOf(TState parentState)
+        {
+            var parentStateDef = _stateMachineDsl.GetDefinedState(parentState);
+            Debug.Assert(parentStateDef != null, nameof(parentStateDef) + " != null");
+            MyStateDef.Parent = parentStateDef;
+            return this;
         }
     }
 }

@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 
 namespace SimpleStateMachine.Definitions
 {
     public class StateDef<TState, TInput, TOutput> : IEquatable<StateDef<TState, TInput, TOutput>>
     {
         private readonly List<StateDef<TState, TInput, TOutput>> _children;
+        private StateDef<TState, TInput, TOutput>? _parent;
 
         public StateDef(TState id)
         {
@@ -18,8 +21,19 @@ namespace SimpleStateMachine.Definitions
         }
 
         public TState Id { get; internal set; }
+
         public bool IsInitialSubState { get; internal set; }
-        public StateDef<TState, TInput, TOutput> Parent { get; internal set; }
+
+        public StateDef<TState, TInput, TOutput>? Parent
+        {
+            get => _parent;
+            internal set
+            {
+                Debug.Assert(value != null, nameof(value) + " != null");
+                _parent = value;
+                _parent.AddChild(this);
+            }
+        }
 
         public IReadOnlyList<StateDef<TState, TInput, TOutput>> Children => _children.AsReadOnly();
 
@@ -28,12 +42,14 @@ namespace SimpleStateMachine.Definitions
             _children.Add(child);
             return this;
         }
-        
-        public ExecutionDef<TInput,TOutput> OnEntry { get; internal set; }
-        public ExecutionDef<TInput,TOutput> OnExit { get; internal set; }
-        public ExecutionDef<TInput,TOutput> OnState { get; internal set; }
-        
-        public IReadOnlyList<TransitionDef<TState,TInput>> Transitions { get; internal set; }
+
+        public ExecutionDef<TInput, TOutput> OnEntry { get; internal set; }
+
+        public ExecutionDef<TInput, TOutput> OnExit { get; internal set; }
+
+        public ExecutionDef<TInput, TOutput> OnState { get; internal set; }
+
+        public IReadOnlyList<TransitionDef<TState, TInput>> Transitions { get; internal set; }
 
         public bool Equals(StateDef<TState, TInput, TOutput> other)
         {
@@ -60,9 +76,14 @@ namespace SimpleStateMachine.Definitions
             return Equals(left, right);
         }
 
-        public static bool operator !=(StateDef<TState, TInput, TOutput> left, StateDef<TState, TInput, TOutput> right)
+        public static bool operator !=(StateDef<TState, TInput, TOutput>? left, StateDef<TState, TInput, TOutput>? right)
         {
             return !Equals(left, right);
+        }
+
+        public bool IsComposite()
+        {
+            return Children.Count > 0;
         }
     }
 }

@@ -1,24 +1,32 @@
-using System;
+using System.Diagnostics;
 using System.Linq;
 using SimpleStateMachine.Definitions;
 
 namespace SimpleStateMachine.Engine
 {
-    internal class Compiler
+    internal static class Compiler
     {
-        public IStateMachine<TState, TInput, TOutput> Compile<TState, TInput, TOutput>(StateMachineDef<TState, TInput, TOutput> def)
+        internal static StateDef<TState, TInput, TOutput> InitialState<TState, TInput, TOutput>(
+            StateDef<TState, TInput, TOutput>? def)
         {
-            var states = new CompiledStates<TState, TInput, TOutput>(def);
-            return new StateMachine<TState, TInput, TOutput>(states);
+            Debug.Assert(def != null, nameof(def) + " != null");
+            if (!def.IsComposite()) return def;
+            var candidate = def.Children.Single(c => c.IsInitialSubState);
+            return candidate.IsComposite() switch
+            {
+                false => candidate,
+                true => InitialState(candidate)
+            };
         }
     }
 
     public static class DslExtensions
     {
-        public static IStateMachine<TState, TInput, TOutput> Create<TState, TInput, TOutput>(this StateMachineDef<TState, TInput, TOutput> @this)
+        public static IStateMachine<TState, TInput, TOutput> Create<TState, TInput, TOutput>(
+            this StateMachineDef<TState, TInput, TOutput> @this)
         {
-            var compiler = new Compiler();
-            return compiler.Compile(@this);
+            var states = new CompiledStates<TState, TInput, TOutput>(@this);
+            return new StateMachine<TState, TInput, TOutput>(states);
         }
     }
 }
