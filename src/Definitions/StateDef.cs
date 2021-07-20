@@ -9,6 +9,7 @@ namespace SimpleStateMachine.Definitions
     {
         private readonly List<StateDef<TState, TInput, TOutput>> _children;
         private StateDef<TState, TInput, TOutput>? _parent;
+        private readonly List<TransitionDef<TState, TInput>> _transitions;
 
         public StateDef(TState id)
         {
@@ -17,6 +18,7 @@ namespace SimpleStateMachine.Definitions
             OnExit = new ExecutionDef<TInput, TOutput>(Array.Empty<Func<TInput, TOutput>>());
             OnEntry = new ExecutionDef<TInput, TOutput>(Array.Empty<Func<TInput, TOutput>>());
             OnState = new ExecutionDef<TInput, TOutput>(Array.Empty<Func<TInput, TOutput>>());
+            _transitions = new List<TransitionDef<TState, TInput>>();
 
         }
 
@@ -49,7 +51,7 @@ namespace SimpleStateMachine.Definitions
 
         public ExecutionDef<TInput, TOutput> OnState { get; internal set; }
 
-        public IReadOnlyList<TransitionDef<TState, TInput>> Transitions { get; internal set; }
+        public IReadOnlyList<TransitionDef<TState, TInput>> Transitions => _transitions;
 
         public bool Equals(StateDef<TState, TInput, TOutput> other)
         {
@@ -84,6 +86,11 @@ namespace SimpleStateMachine.Definitions
         public bool IsComposite()
         {
             return Children.Count > 0;
+        }
+
+        public void AddTransitions(List<TransitionDef<TState,TInput>> transitions)
+        {
+            _transitions.AddRange(transitions);
         }
     }
 }

@@ -45,8 +45,8 @@ namespace SimpleStateMachine.Dsl
         
         public StateDsl<TState, TInput, TOutput> Transitions(params TransitionDsl<TState, TInput>[] transitions)
         {
-            MyStateDef.Transitions = transitions.Select(t => new TransitionDef<TState, TInput>()
-                {From = MyStateDef.Id, To = t.TargetState, Predicate = t.Predicate}).ToList().AsReadOnly();
+            MyStateDef.AddTransitions(transitions.Select(t => new TransitionDef<TState, TInput>()
+                {From = MyStateDef.Id, To = t.TargetState, Predicate = t.Predicate}).ToList());
             return this;
         }
 
