@@ -51,6 +51,19 @@ namespace SimpleStateMachine.Definitions
 
         public ExecutionDef<TInput, TOutput> OnState { get; internal set; }
 
+        public ExecutionDef<TInput, TOutput> InheritedOnState()
+        {
+            var funcs = new List<Func<TInput, TOutput>>();
+            if (Parent is not null)
+            {
+                funcs.AddRange(Parent.OnState.Funcs);
+            }
+
+            return new ExecutionDef<TInput, TOutput>(funcs);
+        }
+        
+        
+
         public IReadOnlyList<TransitionDef<TState, TInput>> Transitions => _transitions;
 
         public bool Equals(StateDef<TState, TInput, TOutput> other)

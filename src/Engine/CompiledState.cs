@@ -60,8 +60,10 @@ namespace SimpleStateMachine.Engine
         private IReadOnlyList<Func<TInput, TOutput>> OnEntryFuncs(TState stateId) => 
             _stateMachineDef.StateDef(stateId)?.OnEntry.Funcs ?? Array.Empty<Func<TInput,TOutput>>();
         
-        private IReadOnlyList<Func<TInput, TOutput>> OnStateFuncs(TState stateId) => 
-            _stateMachineDef.StateDef(stateId)?.OnState.Funcs ?? Array.Empty<Func<TInput,TOutput>>();
-
+        private IReadOnlyList<Func<TInput, TOutput>> OnStateFuncs(TState stateId)
+        {
+            var stateDef = _stateMachineDef.StateDef(stateId);
+            return stateDef?.InheritedOnState().Concat(stateDef?.OnState).Funcs  ?? Array.Empty<Func<TInput, TOutput>>();
+        }
     }
 }

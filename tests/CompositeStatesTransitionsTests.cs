@@ -6,7 +6,7 @@ using static SimpleStateMachine.Tests.State;
 
 namespace SimpleStateMachine.Tests
 {
-    public class StateMachineWithCompositeStatesTests
+    public class CompositeStatesTransitionsTests
     {
         [Test]
         public void transition_to_a_simple_composite_state()
