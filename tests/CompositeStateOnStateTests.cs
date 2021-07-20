@@ -11,13 +11,13 @@ namespace SimpleStateMachine.Tests
     [TestFixture]
     public class CompositeStateOnStateTests
     {
-        [Test]
-        public void should_execute_functions_defined_on_the_parent()
+        [TestCase(A_2,1,new []{10,200})]
+        [TestCase(A_1_1,1,new []{10,100,1000})]
+        public void should_execute_functions_defined_on_the_parent(State fromState, int input, int[] expected)
         {
             var sm = CreateStateMachine();
-            var (nextState, outputs) = sm.TransitionFrom(A_1, 1);
-            Check.That(nextState).IsEqualTo(A_1);
-            Check.That(outputs).ContainsExactly(10, 100);
+            var (_, outputs) = sm.TransitionFrom(fromState, input);
+            Check.That(outputs).ContainsExactly(expected);
         }
         
         
@@ -35,6 +35,10 @@ namespace SimpleStateMachine.Tests
                 )
                 .State(A_1).InitialSubStateOf(A)
                     .OnState(i=>i * 100)
+                .State(A_1_1).InitialSubStateOf(A_1)
+                    .OnState(i=>i * 1000)
+                .State(A_2).SubStateOf(A)
+                    .OnState(i=>i*200)
                 .BuildDefinition()
                 .Create();
         }

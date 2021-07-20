@@ -53,13 +53,15 @@ namespace SimpleStateMachine.Definitions
 
         public ExecutionDef<TInput, TOutput> InheritedOnState()
         {
-            var funcs = new List<Func<TInput, TOutput>>();
-            if (Parent is not null)
+            var funcs = new Stack<IReadOnlyList<Func<TInput, TOutput>>>();
+            var current = Parent;
+            while (current is not null)
             {
-                funcs.AddRange(Parent.OnState.Funcs);
+                funcs.Push(current.OnState.Funcs);
+                current = current.Parent;
             }
 
-            return new ExecutionDef<TInput, TOutput>(funcs);
+            return new ExecutionDef<TInput, TOutput>(funcs.SelectMany(m=>m).ToList());
         }
         
         
