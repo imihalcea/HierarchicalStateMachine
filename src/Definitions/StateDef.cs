@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 
 namespace SimpleStateMachine.Definitions
 {
@@ -53,19 +52,14 @@ namespace SimpleStateMachine.Definitions
 
         public ExecutionDef<TInput, TOutput> InheritedOnState()
         {
-            var funcs = new Stack<IReadOnlyList<Func<TInput, TOutput>>>();
-            var current = Parent;
-            while (current is not null)
+            var funcs = new List<Func<TInput, TOutput>>();
+            return Parent switch
             {
-                funcs.Push(current.OnState.Funcs);
-                current = current.Parent;
-            }
-
-            return new ExecutionDef<TInput, TOutput>(funcs.SelectMany(m=>m).ToList());
+                null => new ExecutionDef<TInput, TOutput>(new List<Func<TInput, TOutput>>()),
+                _ => Parent.InheritedOnState().Concat(Parent.OnState)
+            };
         }
         
-        
-
         public IReadOnlyList<TransitionDef<TState, TInput>> Transitions => _transitions;
 
         public bool Equals(StateDef<TState, TInput, TOutput> other)
