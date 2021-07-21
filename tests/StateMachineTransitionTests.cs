@@ -1,4 +1,5 @@
 using System.Linq;
+using NFluent;
 using NUnit.Framework;
 using SimpleStateMachine.Engine;
 using static SimpleStateMachine.Dsl.StateMachineDsl<SimpleStateMachine.Tests.State,int,int>;
@@ -64,7 +65,7 @@ namespace SimpleStateMachine.Tests
             
             var (nextState, outputs) = sm.TransitionFrom(currentState, input);
             Assert.AreEqual(expectedState,nextState);
-            Assert.True(expectedOutput.SequenceEqual(outputs));
+            Check.That(outputs).ContainsExactly(expectedOutput);
         }
     }
 }
