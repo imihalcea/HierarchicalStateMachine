@@ -50,16 +50,22 @@ namespace SimpleStateMachine.Definitions
 
         public ExecutionDef<TInput, TOutput> OnState { get; internal set; }
 
-        public ExecutionDef<TInput, TOutput> InheritedOnState()
+        public ExecutionDef<TInput, TOutput> InheritedOnState() => 
+            Inherited(def => def.OnState);
+        
+        public ExecutionDef<TInput, TOutput> InheritedOnEntry() => 
+            Inherited(def => def.OnEntry);
+
+        public ExecutionDef<TInput, TOutput> Inherited(Func<StateDef<TState, TInput, TOutput>, ExecutionDef<TInput, TOutput>> f)
         {
             var funcs = new List<Func<TInput, TOutput>>();
             return Parent switch
             {
                 null => new ExecutionDef<TInput, TOutput>(new List<Func<TInput, TOutput>>()),
-                _ => Parent.InheritedOnState().Concat(Parent.OnState)
+                _ => Parent.Inherited(f).Concat(f(Parent))
             };
         }
-        
+
         public IReadOnlyList<TransitionDef<TState, TInput>> Transitions => _transitions;
 
         public bool Equals(StateDef<TState, TInput, TOutput> other)

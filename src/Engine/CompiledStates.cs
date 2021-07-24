@@ -5,7 +5,7 @@ using SimpleStateMachine.Definitions;
 
 namespace SimpleStateMachine.Engine
 {
-    public class CompiledStates<TState, TInput, TOutput>
+    public class CompiledStates<TState, TInput, TOutput> where TState:notnull
     {
         private readonly Dictionary<TState,CompiledState<TState,TInput,TOutput>> _compiledStates;
 
