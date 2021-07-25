@@ -27,19 +27,19 @@ namespace SimpleStateMachine.Dsl
 
         public StateDsl<TState, TInput, TOutput> OnEntry(params Func<TInput, TOutput>[] funcs)
         {
-            MyStateDef.OnEntry = new ExecutionDef<TInput, TOutput>(funcs);
+            MyStateDef.OnEntry = new BehaviourDef<TInput, TOutput>(funcs);
             return this;
         }
         
         public StateDsl<TState, TInput, TOutput> OnState(params Func<TInput, TOutput>[] funcs)
         {
-            MyStateDef.OnState = new ExecutionDef<TInput, TOutput>(funcs);
+            MyStateDef.OnState = new BehaviourDef<TInput, TOutput>(funcs);
             return this;
         }
         
         public StateDsl<TState, TInput, TOutput> OnExit(params Func<TInput, TOutput>[] funcs)
         {
-            MyStateDef.OnExit = new ExecutionDef<TInput, TOutput>(funcs);
+            MyStateDef.OnExit = new BehaviourDef<TInput, TOutput>(funcs);
             return this;
         }
         

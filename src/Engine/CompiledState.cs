@@ -7,7 +7,7 @@ using SimpleStateMachine.Helpers;
 
 namespace SimpleStateMachine.Engine
 {
-    public class CompiledState<TState, TInput, TOutput>
+    public class CompiledState<TState, TInput, TOutput> where TState:notnull
     {
         private readonly StateMachineDef<TState, TInput, TOutput> _stateMachineDef;
         private readonly List<(TState to, Predicate<TInput> predicate)> _transitions;
@@ -20,7 +20,7 @@ namespace SimpleStateMachine.Engine
             _id = def.Id;
             _transitions = new List<(TState to, Predicate<TInput> predicate)>();
             _transitionFuncs = new Dictionary<TState, List<Func<TInput, TOutput>>>();
-            CompileTransitions(def);
+            CompileBehaviour(def);
             
         }
 
@@ -36,51 +36,72 @@ namespace SimpleStateMachine.Engine
         public IReadOnlyList<Func<TInput, TOutput>> TransitionFuncs(TState to) => 
             _transitionFuncs.GetValueOrDefault(to, new List<Func<TInput, TOutput>>());
         
-        private void CompileTransitions(StateDef<TState, TInput, TOutput> def)
+        private void CompileBehaviour(StateDef<TState, TInput, TOutput> def)
         {
-            foreach (var definedTransition in def.Transitions)
+            CompileDefinedBehaviour();
+            CompileInheritedBehavior();
+            CompileOnStateBehaviour();
+
+            void CompileDefinedBehaviour()
             {
-                var targetStateDef = FindTargetState(definedTransition.To);
-                var effectiveTransition = new TransitionDef<TState, TInput>()
+                foreach (var definedTransition in def.Transitions)
                 {
-                    From = definedTransition.From,
-                    To = targetStateDef.Id,
-                    Predicate = definedTransition.Predicate
-                };
-                _transitions.Add((effectiveTransition.To, definedTransition.Predicate));
-                _transitionFuncs.AddOrUpdate(effectiveTransition.To,_=>CompileTransitionFuncs(effectiveTransition), (_,l)=>l.AddRange(CompileTransitionFuncs(effectiveTransition).ToArray()));
+                    var targetStateDef = FindTargetState(definedTransition.To);
+                    var effectiveTransition = new TransitionDef<TState, TInput>()
+                    {
+                        From = definedTransition.From,
+                        To = targetStateDef.Id,
+                        Predicate = definedTransition.Predicate
+                    };
+                    _transitions.Add((effectiveTransition.To, definedTransition.Predicate));
+                    _transitionFuncs.AddOrUpdate(effectiveTransition.To, _ => CompileTransitionFuncs(effectiveTransition),
+                        (_, l) => l.AddRange(CompileTransitionFuncs(effectiveTransition).ToArray()));
+                }
             }
 
-            ExecuteWhenNotTransitioning(def);
+            void CompileInheritedBehavior()
+            {
+                foreach (var inheritedTransitionDef in def.InheritedTransitions())
+                {
+                    _transitions.Add((inheritedTransitionDef.To, inheritedTransitionDef.Predicate));
+                    _transitionFuncs.AddOrUpdate(inheritedTransitionDef.To, _ => CompileTransitionFuncs(inheritedTransitionDef),
+                        (_, l) => l.AddRange(CompileTransitionFuncs(inheritedTransitionDef).ToArray()));
+                }
+            }
+            
+            void CompileOnStateBehaviour()
+            {
+                _transitionFuncs.AddOrUpdate(def.Id, _ => OnStateFuncs(def.Id).ToList(),
+                    (_, l) => l.AddRange(OnStateFuncs(def.Id)));
+            }
         }
 
-        private void ExecuteWhenNotTransitioning(StateDef<TState, TInput, TOutput> def)
-        {
-            _transitionFuncs.AddOrUpdate(def.Id, _ => OnStateFuncs(def.Id).ToList(),
-                (_, l) => l.AddRange(OnStateFuncs(def.Id)));
-        }
-
+ 
         private List<Func<TInput, TOutput>> CompileTransitionFuncs(TransitionDef<TState, TInput> transitionDef) => 
             OnExitFuncs(transitionDef.From)
             .Concat(OnEntryFuncs(transitionDef.To))
             .Concat(OnStateFuncs(transitionDef.To))
             .ToList();
 
-        private IReadOnlyList<Func<TInput, TOutput>> OnExitFuncs(TState stateId) => 
-            _stateMachineDef.StateDef(stateId)?.OnExit.Funcs ?? Array.Empty<Func<TInput,TOutput>>();
-        
+        private IReadOnlyList<Func<TInput, TOutput>> OnExitFuncs(TState stateId)
+        {
+            var stateDef = _stateMachineDef.StateDef(stateId);
+            var behaviourDef = stateDef?.InheritedBehaviour(def=>def.OnExit).Concat(stateDef?.OnExit);
+            return behaviourDef?.Funcs.Reverse().ToArray() ?? Array.Empty<Func<TInput, TOutput>>();
+        }
+
         private IReadOnlyList<Func<TInput, TOutput>> OnEntryFuncs(TState stateId)
         {
             var stateDef = _stateMachineDef.StateDef(stateId);
-            var onEntryFuncs = stateDef?.Inherited(def=>def.OnEntry).Concat(stateDef?.OnEntry);
-            return onEntryFuncs?.Funcs ?? Array.Empty<Func<TInput, TOutput>>();
+            var behaviourDef = stateDef?.InheritedBehaviour(def=>def.OnEntry).Concat(stateDef?.OnEntry);
+            return behaviourDef?.Funcs ?? Array.Empty<Func<TInput, TOutput>>();
         }
 
         private IReadOnlyList<Func<TInput, TOutput>> OnStateFuncs(TState stateId)
         {
             var stateDef = _stateMachineDef.StateDef(stateId);
-            var onStateFuncs = stateDef?.Inherited(def => def.OnState).Concat(stateDef?.OnState);
-            return onStateFuncs?.Funcs ?? Array.Empty<Func<TInput, TOutput>>();
+            var behaviourDef = stateDef?.InheritedBehaviour(def => def.OnState).Concat(stateDef?.OnState);
+            return behaviourDef?.Funcs ?? Array.Empty<Func<TInput, TOutput>>();
         }
         
         private  StateDef<TState, TInput, TOutput> FindTargetState(TState stateId)

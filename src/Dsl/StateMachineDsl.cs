@@ -4,7 +4,7 @@ using SimpleStateMachine.Definitions;
 
 namespace SimpleStateMachine.Dsl
 {
-    public class StateMachineDsl<TState, TInput, TOutput>
+    public class StateMachineDsl<TState, TInput, TOutput> where TState:notnull
     {
         internal readonly TState _initialStateId;
         internal readonly List<StateDef<TState,TInput,TOutput>> _definedStates;

@@ -7,17 +7,16 @@ using static SimpleStateMachine.Tests.State;
 
 namespace SimpleStateMachine.Tests
 {
-    [TestFixture]
-    public class CompositeStateOnEntryTests
+    public class CompositeStatesInheritedTransitionsTests
     {
-        [TestCase(O,1,new []{10,100,1000})]
-        public void should_execute_functions_defined_on_the_parent(State fromState, int input, int[] expected)
+        [TestCase(A_1_1,1,O)]
+        [TestCase(A_2,1,O)]
+        public void should_inherit_transitions_defined_on_parent(State fromState, int input, State expectedState)
         {
             var sm = CreateStateMachine();
-            var (ns, outputs) = sm.TransitionFrom(fromState, input);
-            Check.That(outputs).ContainsExactly(expected);
+            var (nextState, _) = sm.TransitionFrom(fromState, input);
+            Check.That(nextState).IsEqualTo(expectedState);
         }
-        
         
         private static IStateMachine<State, int, int> CreateStateMachine()
         {
@@ -27,16 +26,13 @@ namespace SimpleStateMachine.Tests
                     To(A).When(i=>i==1)
                 )
                 .State(A)
-                    .OnEntry(i=>i*10)
+                .OnExit(i=>i*10)
                 .Transitions(
                     To(O).When(i=>i==1)
                 )
                 .State(A_1).InitialSubStateOf(A)
-                    .OnEntry(i=>i * 100)
                 .State(A_1_1).InitialSubStateOf(A_1)
-                    .OnEntry(i=>i * 1000)
                 .State(A_2).SubStateOf(A)
-                    .OnEntry(i=>i*200)
                 .BuildDefinition()
                 .Create();
         }

@@ -2,7 +2,7 @@
 
 namespace SimpleStateMachine.Engine
 {
-    internal class StateMachine<TState, TInput, TOutput> : IStateMachine<TState, TInput, TOutput>
+    internal class StateMachine<TState, TInput, TOutput> : IStateMachine<TState, TInput, TOutput> where TState:notnull
     {
         private readonly CompiledStates<TState, TInput, TOutput> _states;
 

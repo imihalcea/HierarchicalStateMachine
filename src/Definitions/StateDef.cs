@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace SimpleStateMachine.Definitions
 {
-    public class StateDef<TState, TInput, TOutput> : IEquatable<StateDef<TState, TInput, TOutput>>
+    public class StateDef<TState, TInput, TOutput> : IEquatable<StateDef<TState, TInput, TOutput>> where TState:notnull
     {
         private readonly List<StateDef<TState, TInput, TOutput>> _children;
         private StateDef<TState, TInput, TOutput>? _parent;
@@ -14,9 +15,9 @@ namespace SimpleStateMachine.Definitions
         {
             Id = id;
             _children = new List<StateDef<TState, TInput, TOutput>>();
-            OnExit = new ExecutionDef<TInput, TOutput>(Array.Empty<Func<TInput, TOutput>>());
-            OnEntry = new ExecutionDef<TInput, TOutput>(Array.Empty<Func<TInput, TOutput>>());
-            OnState = new ExecutionDef<TInput, TOutput>(Array.Empty<Func<TInput, TOutput>>());
+            OnExit = new BehaviourDef<TInput, TOutput>(Array.Empty<Func<TInput, TOutput>>());
+            OnEntry = new BehaviourDef<TInput, TOutput>(Array.Empty<Func<TInput, TOutput>>());
+            OnState = new BehaviourDef<TInput, TOutput>(Array.Empty<Func<TInput, TOutput>>());
             _transitions = new List<TransitionDef<TState, TInput>>();
 
         }
@@ -44,38 +45,47 @@ namespace SimpleStateMachine.Definitions
             return this;
         }
 
-        public ExecutionDef<TInput, TOutput> OnEntry { get; internal set; }
+        public BehaviourDef<TInput, TOutput> OnEntry { get; internal set; }
 
-        public ExecutionDef<TInput, TOutput> OnExit { get; internal set; }
+        public BehaviourDef<TInput, TOutput> OnExit { get; internal set; }
 
-        public ExecutionDef<TInput, TOutput> OnState { get; internal set; }
+        public BehaviourDef<TInput, TOutput> OnState { get; internal set; }
 
-        public ExecutionDef<TInput, TOutput> InheritedOnState() => 
-            Inherited(def => def.OnState);
-        
-        public ExecutionDef<TInput, TOutput> InheritedOnEntry() => 
-            Inherited(def => def.OnEntry);
-
-        public ExecutionDef<TInput, TOutput> Inherited(Func<StateDef<TState, TInput, TOutput>, ExecutionDef<TInput, TOutput>> f)
+        public BehaviourDef<TInput, TOutput> InheritedBehaviour(Func<StateDef<TState, TInput, TOutput>, BehaviourDef<TInput, TOutput>> f)
         {
-            var funcs = new List<Func<TInput, TOutput>>();
             return Parent switch
             {
-                null => new ExecutionDef<TInput, TOutput>(new List<Func<TInput, TOutput>>()),
-                _ => Parent.Inherited(f).Concat(f(Parent))
+                null => new BehaviourDef<TInput, TOutput>(new List<Func<TInput, TOutput>>()),
+                _ => Parent.InheritedBehaviour(f).Concat(f(Parent))
             };
+        }
+        
+        public IReadOnlyList<TransitionDef<TState,TInput>> InheritedTransitions()
+        {
+            var transitionDefs =  Parent switch
+            {
+                null => new List<TransitionDef<TState, TInput>>(),
+                _ => Parent.Transitions.Concat(Parent.InheritedTransitions()).ToList()
+            };
+
+            return transitionDefs.Select(it => new TransitionDef<TState, TInput>()
+            {
+                From = Id,
+                Predicate = it.Predicate,
+                To = it.To
+            }).ToList();
         }
 
         public IReadOnlyList<TransitionDef<TState, TInput>> Transitions => _transitions;
 
-        public bool Equals(StateDef<TState, TInput, TOutput> other)
+        public bool Equals(StateDef<TState, TInput, TOutput>? other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
             return EqualityComparer<TState>.Default.Equals(Id, other.Id);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
@@ -107,5 +117,7 @@ namespace SimpleStateMachine.Definitions
         {
             _transitions.AddRange(transitions);
         }
+
+
     }
 }
