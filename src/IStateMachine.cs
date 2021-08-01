@@ -1,4 +1,4 @@
-namespace SimpleStateMachine
+namespace HierarchicalStateMachine
 {
     public interface IStateMachine<TState, in TInput, TOutput>
     {

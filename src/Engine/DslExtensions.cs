@@ -1,6 +1,6 @@
-using SimpleStateMachine.Definitions;
+using HierarchicalStateMachine.Definitions;
 
-namespace SimpleStateMachine.Engine
+namespace HierarchicalStateMachine.Engine
 {
     public static class DslExtensions
     {

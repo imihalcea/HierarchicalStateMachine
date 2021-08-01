@@ -1,6 +1,6 @@
 using System;
 
-namespace SimpleStateMachine.Dsl
+namespace HierarchicalStateMachine.Dsl
 {
     public class TransitionState<TState, TInput>
     {

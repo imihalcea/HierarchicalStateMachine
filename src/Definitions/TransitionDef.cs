@@ -1,6 +1,6 @@
 using System;
 
-namespace SimpleStateMachine.Definitions
+namespace HierarchicalStateMachine.Definitions
 {
     public class TransitionDef<TState, TInput> where TState:notnull
     {

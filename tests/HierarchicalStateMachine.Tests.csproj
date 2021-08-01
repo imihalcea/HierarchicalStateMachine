@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\SimpleStateMachine.csproj" />
+    <ProjectReference Include="..\src\HierarchicalStateMachine.csproj" />
   </ItemGroup>
 
 </Project>

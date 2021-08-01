@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SimpleStateMachine.Definitions
+namespace HierarchicalStateMachine.Definitions
 {
     public class BehaviourDef<TInput, TOutput>
     {

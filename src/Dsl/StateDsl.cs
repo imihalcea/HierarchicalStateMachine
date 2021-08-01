@@ -1,9 +1,9 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using SimpleStateMachine.Definitions;
+using HierarchicalStateMachine.Definitions;
 
-namespace SimpleStateMachine.Dsl
+namespace HierarchicalStateMachine.Dsl
 {
     public class StateDsl<TState, TInput, TOutput> where TState:notnull
     {

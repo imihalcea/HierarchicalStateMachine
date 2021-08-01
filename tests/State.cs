@@ -1,4 +1,4 @@
-namespace SimpleStateMachine.Tests
+namespace HierarchicalStateMachine.Tests
 {
     public enum State
     {

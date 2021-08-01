@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using SimpleStateMachine.Definitions;
+using HierarchicalStateMachine.Definitions;
 
-namespace SimpleStateMachine.Dsl
+namespace HierarchicalStateMachine.Dsl
 {
     public class StateMachineDsl<TState, TInput, TOutput> where TState:notnull
     {

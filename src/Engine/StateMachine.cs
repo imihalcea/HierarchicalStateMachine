@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace SimpleStateMachine.Engine
+namespace HierarchicalStateMachine.Engine
 {
     internal class StateMachine<TState, TInput, TOutput> : IStateMachine<TState, TInput, TOutput> where TState:notnull
     {

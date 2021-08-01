@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SimpleStateMachine.Helpers
+namespace HierarchicalStateMachine.Helpers
 {
     public static class Extensions
     {

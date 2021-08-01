@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace SimpleStateMachine.Definitions
+namespace HierarchicalStateMachine.Definitions
 {
     public class StateDef<TState, TInput, TOutput> : IEquatable<StateDef<TState, TInput, TOutput>> where TState:notnull
     {

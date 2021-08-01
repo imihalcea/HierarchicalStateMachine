@@ -1,10 +1,10 @@
+using HierarchicalStateMachine.Engine;
 using NUnit.Framework;
-using SimpleStateMachine.Engine;
-using static SimpleStateMachine.Dsl.StateMachineDsl<SimpleStateMachine.Tests.State,int,int>;
-using static SimpleStateMachine.Dsl.TransitionState<SimpleStateMachine.Tests.State,int>;
-using static SimpleStateMachine.Tests.State;
+using static HierarchicalStateMachine.Dsl.StateMachineDsl<HierarchicalStateMachine.Tests.State,int,int>;
+using static HierarchicalStateMachine.Dsl.TransitionState<HierarchicalStateMachine.Tests.State,int>;
+using static HierarchicalStateMachine.Tests.State;
 
-namespace SimpleStateMachine.Tests
+namespace HierarchicalStateMachine.Tests
 {
     public class CompositeStatesTransitionsTests
     {
