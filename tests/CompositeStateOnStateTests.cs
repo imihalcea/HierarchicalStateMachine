@@ -18,7 +18,15 @@ namespace HierarchicalStateMachine.Tests
             var (_, outputs) = sm.TransitionFrom(fromState, input);
             Check.That(outputs).ContainsExactly(expected);
         }
-        
+
+        [Test]
+        public void self_transition_compile_on_state_behaviour()
+        {
+            var sm = CreateStateMachineWithSelfTransition();
+            var (nextState, outputs) = sm.TransitionFrom(A, 1);
+            Check.That(nextState).IsEqualTo(A);
+            Check.That(outputs).ContainsExactly(10, 10);
+        }
         
         private static IStateMachine<State, int, int> CreateStateMachine()
         {
@@ -38,6 +46,18 @@ namespace HierarchicalStateMachine.Tests
                     .OnState(i=>i * 1000)
                 .State(A_2).SubStateOf(A)
                     .OnState(i=>i*200)
+                .BuildDefinition()
+                .Create();
+        }
+
+        private static IStateMachine<State, int, int> CreateStateMachineWithSelfTransition()
+        {
+             return StateMachine(A)
+                .State(A)
+                    .OnState(i=>i*10)
+                    .Transitions(
+                        To(A).When(i=>i==1)
+                    )
                 .BuildDefinition()
                 .Create();
         }
