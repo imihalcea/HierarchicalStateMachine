@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace HierarchicalStateMachine.Definitions
+namespace NextMachina.Definitions
 {
     public class StateMachineDef<TState, TInput, TOutput> where TState:notnull
     {

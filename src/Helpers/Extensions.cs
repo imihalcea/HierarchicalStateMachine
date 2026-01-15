@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 // ReSharper disable InconsistentNaming
 
-namespace HierarchicalStateMachine.Helpers
+namespace NextMachina.Helpers
 {
     public static class Extensions
     {

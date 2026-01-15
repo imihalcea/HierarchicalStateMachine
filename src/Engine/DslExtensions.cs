@@ -1,6 +1,6 @@
-using HierarchicalStateMachine.Definitions;
+using NextMachina.Definitions;
 
-namespace HierarchicalStateMachine.Engine
+namespace NextMachina.Engine
 {
     public static class DslExtensions
     {

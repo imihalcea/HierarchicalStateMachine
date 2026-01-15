@@ -1,10 +1,10 @@
+using NextMachina.Engine;
 using NUnit.Framework;
-using HierarchicalStateMachine.Engine;
-using static HierarchicalStateMachine.Dsl.StateMachineDsl<HierarchicalStateMachine.Tests.State,int,string>;
-using static HierarchicalStateMachine.Dsl.TransitionState<HierarchicalStateMachine.Tests.State,int>;
-using static HierarchicalStateMachine.Tests.State;
+using static NextMachina.Dsl.StateMachineDsl<NextMachina.Tests.State,int,string>;
+using static NextMachina.Dsl.TransitionState<NextMachina.Tests.State,int>;
+using static NextMachina.Tests.State;
 
-namespace HierarchicalStateMachine.Tests
+namespace NextMachina.Tests
 {
     [TestFixture]
     public class LeastCommonAncestorTransitionTests

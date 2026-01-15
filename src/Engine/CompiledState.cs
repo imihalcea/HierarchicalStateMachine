@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using HierarchicalStateMachine.Definitions;
-using HierarchicalStateMachine.Helpers;
+using NextMachina.Definitions;
+using NextMachina.Helpers;
 
-namespace HierarchicalStateMachine.Engine
+namespace NextMachina.Engine
 {
     public class CompiledState<TState, TInput, TOutput> where TState:notnull
     {

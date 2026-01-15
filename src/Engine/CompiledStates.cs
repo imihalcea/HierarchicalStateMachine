@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using HierarchicalStateMachine.Definitions;
+using NextMachina.Definitions;
 
-namespace HierarchicalStateMachine.Engine
+namespace NextMachina.Engine
 {
     public class CompiledStates<TState, TInput, TOutput> where TState:notnull
     {

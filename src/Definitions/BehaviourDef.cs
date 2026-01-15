@@ -2,20 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace HierarchicalStateMachine.Definitions
+namespace NextMachina.Definitions;
+
+public class BehaviourDef<TInput, TOutput>
 {
-    public class BehaviourDef<TInput, TOutput>
+    public BehaviourDef(IReadOnlyList<Func<TInput, TOutput>> funcs)
     {
-        public BehaviourDef(IReadOnlyList<Func<TInput, TOutput>> funcs)
-        {
-            Funcs = funcs;
-        }
+        Funcs = funcs;
+    }
 
-        public IReadOnlyList<Func<TInput, TOutput>> Funcs { get; }
+    public IReadOnlyList<Func<TInput, TOutput>> Funcs { get; }
 
-        public BehaviourDef<TInput, TOutput> Concat(BehaviourDef<TInput, TOutput>? executionDef)
-        {
-            return new(Funcs.Concat(executionDef?.Funcs??Array.Empty<Func<TInput,TOutput>>()).ToArray());
-        }
+    public BehaviourDef<TInput, TOutput> Concat(BehaviourDef<TInput, TOutput>? executionDef)
+    {
+        return new(Funcs.Concat(executionDef?.Funcs??Array.Empty<Func<TInput,TOutput>>()).ToArray());
     }
 }

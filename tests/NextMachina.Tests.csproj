@@ -6,6 +6,8 @@
     <IsPackable>false</IsPackable>
 
     <LangVersion>default</LangVersion>
+
+    <RootNamespace>NextMachina.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\HierarchicalStateMachine.csproj" />
+    <ProjectReference Include="..\src\NextMachina.csproj" />
   </ItemGroup>
 
 </Project>
