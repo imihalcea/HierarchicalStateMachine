@@ -38,7 +38,7 @@ namespace HierarchicalStateMachine.Tests
                         .Create();
             
             var (nextState, _) = sm.TransitionFrom(from, input);
-            Assert.AreEqual(expected,nextState);
+            Assert.That(nextState, Is.EqualTo(nextState));
         }
 
         [TestCase(A, 2, B, new[]{20,200,6,8})]
@@ -63,7 +63,7 @@ namespace HierarchicalStateMachine.Tests
                 .Create();
             
             var (nextState, outputs) = sm.TransitionFrom(currentState, input);
-            Assert.AreEqual(expectedState,nextState);
+            Assert.That(nextState, Is.EqualTo(expectedState));
             Check.That(outputs).ContainsExactly(expectedOutput);
         }
     }

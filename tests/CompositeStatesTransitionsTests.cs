@@ -13,7 +13,7 @@ namespace HierarchicalStateMachine.Tests
         {
             var sm = CreateStateMachine();
             var (nextState, _) = sm.TransitionFrom(O, 0);
-            Assert.AreEqual(A_1, nextState);
+            Assert.That(nextState, Is.EqualTo(A_1));
         }
 
         [Test]
@@ -21,7 +21,7 @@ namespace HierarchicalStateMachine.Tests
         {
             var sm = CreateStateMachine();
             var (nextState, _) = sm.TransitionFrom(O, 1);
-            Assert.AreEqual(B_2, nextState);
+            Assert.That(nextState, Is.EqualTo(B_2));
         }
         
         [Test]
@@ -29,7 +29,7 @@ namespace HierarchicalStateMachine.Tests
         {
             var sm = CreateStateMachine();
             var (nextState, _) = sm.TransitionFrom(B_2, 43);
-            Assert.AreEqual(B_1_1, nextState);
+            Assert.That(nextState, Is.EqualTo(B_1_1));
         }
         
         private static IStateMachine<State, int, int> CreateStateMachine()
