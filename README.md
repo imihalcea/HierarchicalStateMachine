@@ -1,32 +1,32 @@
-# Hierarchical State Machine (HSM)
+# NextMachina - Functional Hierarchical State Machine Library
 
-Une bibliothèque C# légère et flexible pour implémenter des machines à états hiérarchiques. Elle propose une API fluide (DSL) pour définir les états, les transitions et les actions.
+A lightweight and flexible C# library for implementing hierarchical state machines. It offers a fluent API (DSL) to define states, transitions, and actions.
 
-## Fonctionnalités
+## Features
 
-*   **États Hiérarchiques** : Support des états composites (sous-états) avec gestion des états initiaux.
-*   **DSL Fluide** : Définition claire et lisible de la machine à états.
-*   **Actions** : Support des actions `OnEntry`, `OnExit` et `OnState`.
-*   **Transitions Conditionnelles** : Définition de gardes (`When`) pour contrôler les transitions.
-*   **Générique** : Typage fort pour les États, les Entrées (Inputs) et les Sorties (Outputs).
+*   **Hierarchical States**: Support for composite states (sub-states) with initial state management.
+*   **Fluent DSL**: Clear and readable state machine definition.
+*   **Actions**: Support for `OnEntry`, `OnExit`, and `OnState` actions.
+*   **Conditional Transitions**: Definition of guards (`When`) to control transitions.
+*   **Generic**: Strong typing for States, Inputs, and Outputs.
 
 ## Installation
 
-Le projet est une solution .NET standard. Vous pouvez l'intégrer directement dans votre solution ou référencer le projet `HierarchicalStateMachine`.
+The project is a .NET standard solution. You can integrate it directly into your solution or reference the `NextMachina` project.
 
-## Exemple d'utilisation
+## Usage Example
 
-Voici un exemple simple montrant comment définir et utiliser une machine à états.
+Here is a simple example showing how to define and use a state machine.
 
 ```csharp
-using HierarchicalStateMachine.Engine;
-using static HierarchicalStateMachine.Dsl.StateMachineDsl<MyStateEnum, int, string>;
-using static HierarchicalStateMachine.Dsl.TransitionState<MyStateEnum, int>;
+using NextMachina.Engine;
+using static NextMachina.Dsl.StateMachineDsl<MyStateEnum, int, string>;
+using static NextMachina.Dsl.TransitionState<MyStateEnum, int>;
 
-// 1. Définir vos états (par exemple avec une Enum)
+// 1. Define your states (e.g., with an Enum)
 public enum MyStateEnum { Idle, Working, Paused }
 
-// 2. Créer la machine à états via le DSL
+// 2. Create the state machine via the DSL
 var stateMachine = StateMachine(MyStateEnum.Idle)
     .State(MyStateEnum.Idle)
         .Transitions(
@@ -46,23 +46,23 @@ var stateMachine = StateMachine(MyStateEnum.Idle)
     .BuildDefinition()
     .Create();
 
-// 3. Utiliser la machine à états
-// TransitionFrom prend l'état actuel et une entrée, et retourne le nouvel état et les sorties éventuelles.
+// 3. Use the state machine
+// TransitionFrom takes the current state and an input, and returns the new state and any outputs.
 var (nextState, outputs) = stateMachine.TransitionFrom(MyStateEnum.Idle, 1);
-// nextState sera MyStateEnum.Working
+// nextState will be MyStateEnum.Working
 ```
 
-## Structure du Projet
+## Project Structure
 
-*   `src/` : Code source de la bibliothèque.
-    *   `Dsl/` : Implémentation du Domain Specific Language pour la configuration.
-    *   `Engine/` : Moteur d'exécution de la machine à états.
-    *   `Definitions/` : Structures de données définissant le graphe d'états.
-*   `tests/` : Tests unitaires (NUnit) démontrant les différents cas d'usage (états composites, transitions, etc.).
+*   `src/`: Source code of the library.
+    *   `Dsl/`: Implementation of the Domain Specific Language for configuration.
+    *   `Engine/`: Execution engine of the state machine.
+    *   `Definitions/`: Data structures defining the state graph.
+*   `tests/`: Unit tests (NUnit) demonstrating various use cases (composite states, transitions, etc.).
 
-## Contribuer
+## Contributing
 
-Les contributions sont les bienvenues. Assurez-vous que tous les tests passent avant de soumettre une Pull Request.
+Contributions are welcome. Make sure all tests pass before submitting a Pull Request.
 
 ```bash
 dotnet test
