@@ -14,12 +14,14 @@ namespace HierarchicalStateMachine.Engine
         private readonly Dictionary<TState, List<Func<TInput, TOutput>>> _transitionFuncs;
         private readonly TState _id;
 
-        public CompiledState(StateDef<TState, TInput, TOutput> def, StateMachineDef<TState, TInput, TOutput> stateMachineDef)
+        public CompiledState(
+            StateDef<TState, TInput, TOutput> def, 
+            StateMachineDef<TState, TInput, TOutput> stateMachineDef)
         {
             _stateMachineDef = stateMachineDef;
             _id = def.Id;
             _transitions = [];
-            _transitionFuncs = new Dictionary<TState, List<Func<TInput, TOutput>>>();
+            _transitionFuncs = new();
             CompileBehaviour(def);
             
         }
@@ -41,6 +43,7 @@ namespace HierarchicalStateMachine.Engine
             CompileDefinedBehaviour();
             CompileInheritedBehavior();
             CompileOnStateBehaviour();
+            return;
 
             void CompileDefinedBehaviour()
             {
@@ -54,8 +57,11 @@ namespace HierarchicalStateMachine.Engine
                         Predicate = definedTransition.Predicate
                     };
                     _transitions.Add((effectiveTransition.To, definedTransition.Predicate));
-                    _transitionFuncs.AddOrUpdate(effectiveTransition.To, _ => CompileTransitionFuncs(effectiveTransition),
-                        (_, l) => l.AddRange(CompileTransitionFuncs(effectiveTransition).ToArray()));
+                    _transitionFuncs.AddOrUpdate(
+                        key: effectiveTransition.To, 
+                        add: _ => CompileTransitionFuncs(effectiveTransition),
+                        update: (_, l) => l.AddRange(CompileTransitionFuncs(effectiveTransition).ToArray())
+                    );
                 }
             }
 
@@ -64,15 +70,20 @@ namespace HierarchicalStateMachine.Engine
                 foreach (var inheritedTransitionDef in def.InheritedTransitions())
                 {
                     _transitions.Add((inheritedTransitionDef.To, inheritedTransitionDef.Predicate));
-                    _transitionFuncs.AddOrUpdate(inheritedTransitionDef.To, _ => CompileTransitionFuncs(inheritedTransitionDef),
-                        (_, l) => l.AddRange(CompileTransitionFuncs(inheritedTransitionDef).ToArray()));
+                    _transitionFuncs.AddOrUpdate(
+                        key: inheritedTransitionDef.To, 
+                        add: _ => CompileTransitionFuncs(inheritedTransitionDef),
+                        update:(_, l) => l.AddRange(CompileTransitionFuncs(inheritedTransitionDef).ToArray())
+                    );
                 }
             }
             
             void CompileOnStateBehaviour()
             {
-                _transitionFuncs.AddOrUpdate(def.Id, _ => OnStateFuncs(def.Id).ToList(),
-                    (_, l) => l.AddRange(OnStateFuncs(def.Id)));
+                _transitionFuncs.AddOrUpdate(
+                    key: def.Id, 
+                    add: _ => OnStateFuncs(def.Id).ToList(),
+                    update: (_, l) => l.AddRange(OnStateFuncs(def.Id)));
             }
         }
 
@@ -99,19 +110,10 @@ namespace HierarchicalStateMachine.Engine
             var fromAncestors = GetAncestors(fromDef);
             var toAncestors = GetAncestors(toDef);
 
-            // Find the first common ancestor
-            foreach (var ancestor in fromAncestors)
-            {
-                if (toAncestors.Contains(ancestor))
-                {
-                    return ancestor;
-                }
-            }
-
-            return null;
+            return fromAncestors.FirstOrDefault(a => toAncestors.Contains(a));
         }
 
-        private HashSet<StateDef<TState, TInput, TOutput>> GetAncestors(StateDef<TState, TInput, TOutput> def)
+        private static HashSet<StateDef<TState, TInput, TOutput>> GetAncestors(StateDef<TState, TInput, TOutput> def)
         {
             var ancestors = new HashSet<StateDef<TState, TInput, TOutput>>();
             var current = def.Parent;
@@ -123,7 +125,9 @@ namespace HierarchicalStateMachine.Engine
             return ancestors;
         }
 
-        private IReadOnlyList<Func<TInput, TOutput>> OnExitFuncs(TState stateId, StateDef<TState, TInput, TOutput>? stopAtAncestor = null)
+        private IReadOnlyList<Func<TInput, TOutput>> OnExitFuncs(
+            TState stateId, 
+            StateDef<TState, TInput, TOutput>? stopAtAncestor = null)
         {
             var stateDef = _stateMachineDef.StateDef(stateId);
             if (stateDef == null) return Array.Empty<Func<TInput, TOutput>>();
@@ -141,7 +145,9 @@ namespace HierarchicalStateMachine.Engine
             return funcs.ToArray();
         }
 
-        private IReadOnlyList<Func<TInput, TOutput>> OnEntryFuncs(TState stateId, StateDef<TState, TInput, TOutput>? stopAtAncestor = null)
+        private IReadOnlyList<Func<TInput, TOutput>> OnEntryFuncs(
+            TState stateId, 
+            StateDef<TState, TInput, TOutput>? stopAtAncestor = null)
         {
             var stateDef = _stateMachineDef.StateDef(stateId);
             if (stateDef == null) return Array.Empty<Func<TInput, TOutput>>();
