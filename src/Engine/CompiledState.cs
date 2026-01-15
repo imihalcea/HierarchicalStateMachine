@@ -18,7 +18,7 @@ namespace HierarchicalStateMachine.Engine
         {
             _stateMachineDef = stateMachineDef;
             _id = def.Id;
-            _transitions = new List<(TState to, Predicate<TInput> predicate)>();
+            _transitions = [];
             _transitionFuncs = new Dictionary<TState, List<Func<TInput, TOutput>>>();
             CompileBehaviour(def);
             
@@ -34,7 +34,7 @@ namespace HierarchicalStateMachine.Engine
         }
 
         public IReadOnlyList<Func<TInput, TOutput>> TransitionFuncs(TState to) => 
-            _transitionFuncs.GetValueOrDefault(to, new List<Func<TInput, TOutput>>());
+            _transitionFuncs.GetValueOrDefault(to, []);
         
         private void CompileBehaviour(StateDef<TState, TInput, TOutput> def)
         {
@@ -77,30 +77,96 @@ namespace HierarchicalStateMachine.Engine
         }
 
  
-        private List<Func<TInput, TOutput>> CompileTransitionFuncs(TransitionDef<TState, TInput> transitionDef) => 
-            OnExitFuncs(transitionDef.From)
-            .Concat(OnEntryFuncs(transitionDef.To))
-            .Concat(OnStateFuncs(transitionDef.To))
-            .ToList();
-
-        private IReadOnlyList<Func<TInput, TOutput>> OnExitFuncs(TState stateId)
+        private List<Func<TInput, TOutput>> CompileTransitionFuncs(TransitionDef<TState, TInput> transitionDef)
         {
-            var stateDef = _stateMachineDef.StateDef(stateId);
-            var behaviourDef = stateDef?.InheritedBehaviour(def=>def.OnExit).Concat(stateDef?.OnExit);
-            return behaviourDef?.Funcs.Reverse().ToArray() ?? Array.Empty<Func<TInput, TOutput>>();
+            var lca = FindLeastCommonAncestor(transitionDef.From, transitionDef.To);
+            
+            return OnExitFuncs(transitionDef.From, lca)
+                .Concat(OnEntryFuncs(transitionDef.To, lca))
+                .Concat(OnStateFuncs(transitionDef.To))
+                .ToList();
         }
 
-        private IReadOnlyList<Func<TInput, TOutput>> OnEntryFuncs(TState stateId)
+        private StateDef<TState, TInput, TOutput>? FindLeastCommonAncestor(TState fromId, TState toId)
+        {
+            if (EqualityComparer<TState>.Default.Equals(fromId, toId)) return null; // Self transition: exit all, enter all
+
+            var fromDef = _stateMachineDef.StateDef(fromId);
+            var toDef = _stateMachineDef.StateDef(toId);
+
+            if (fromDef == null || toDef == null) return null;
+
+            var fromAncestors = GetAncestors(fromDef);
+            var toAncestors = GetAncestors(toDef);
+
+            // Find the first common ancestor
+            foreach (var ancestor in fromAncestors)
+            {
+                if (toAncestors.Contains(ancestor))
+                {
+                    return ancestor;
+                }
+            }
+
+            return null;
+        }
+
+        private HashSet<StateDef<TState, TInput, TOutput>> GetAncestors(StateDef<TState, TInput, TOutput> def)
+        {
+            var ancestors = new HashSet<StateDef<TState, TInput, TOutput>>();
+            var current = def.Parent;
+            while (current != null)
+            {
+                ancestors.Add(current);
+                current = current.Parent;
+            }
+            return ancestors;
+        }
+
+        private IReadOnlyList<Func<TInput, TOutput>> OnExitFuncs(TState stateId, StateDef<TState, TInput, TOutput>? stopAtAncestor = null)
         {
             var stateDef = _stateMachineDef.StateDef(stateId);
-            var behaviourDef = stateDef?.InheritedBehaviour(def=>def.OnEntry).Concat(stateDef?.OnEntry);
-            return behaviourDef?.Funcs ?? Array.Empty<Func<TInput, TOutput>>();
+            if (stateDef == null) return Array.Empty<Func<TInput, TOutput>>();
+
+            var funcs = new List<Func<TInput, TOutput>>();
+            
+            // Collect OnExit from current state up to (but not including) the stopAtAncestor
+            var current = stateDef;
+            while (current != null && current != stopAtAncestor)
+            {
+                funcs.AddRange(current.OnExit.Funcs);
+                current = current.Parent;
+            }
+
+            return funcs.ToArray();
+        }
+
+        private IReadOnlyList<Func<TInput, TOutput>> OnEntryFuncs(TState stateId, StateDef<TState, TInput, TOutput>? stopAtAncestor = null)
+        {
+            var stateDef = _stateMachineDef.StateDef(stateId);
+            if (stateDef == null) return Array.Empty<Func<TInput, TOutput>>();
+
+            var funcs = new List<Func<TInput, TOutput>>();
+            
+            // Collect OnEntry from current state up to (but not including) the stopAtAncestor
+            // Since we walk up the tree, we are collecting in reverse order of entry (Child -> Parent)
+            // We need to reverse it later to get Parent -> Child
+            var current = stateDef;
+            while (current != null && current != stopAtAncestor)
+            {
+                funcs.AddRange(current.OnEntry.Funcs);
+                current = current.Parent;
+            }
+
+            // Reverse to execute from top-most parent down to child
+            funcs.Reverse();
+            return funcs.ToArray();
         }
 
         private IReadOnlyList<Func<TInput, TOutput>> OnStateFuncs(TState stateId)
         {
             var stateDef = _stateMachineDef.StateDef(stateId);
-            var behaviourDef = stateDef?.InheritedBehaviour(def => def.OnState).Concat(stateDef?.OnState);
+            var behaviourDef = stateDef?.InheritedBehaviour(def => def.OnState).Concat(stateDef.OnState);
             return behaviourDef?.Funcs ?? Array.Empty<Func<TInput, TOutput>>();
         }
         

@@ -98,7 +98,7 @@ namespace HierarchicalStateMachine.Definitions
             return EqualityComparer<TState>.Default.GetHashCode(Id);
         }
 
-        public static bool operator ==(StateDef<TState, TInput, TOutput> left, StateDef<TState, TInput, TOutput> right)
+        public static bool operator ==(StateDef<TState, TInput, TOutput>? left, StateDef<TState, TInput, TOutput>? right)
         {
             return Equals(left, right);
         }
