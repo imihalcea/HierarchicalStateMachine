@@ -13,21 +13,15 @@ public class TransitionState<TState, TInput>
 
     public static TransitionState<TState, TInput> To(TState targetState)
     {
-        return new(targetState);
+        return new TransitionState<TState, TInput>(targetState);
     }
 
     public TransitionDsl<TState, TInput> When(Predicate<TInput> predicate) => 
         new(_targetState, predicate);
 }
     
-public class TransitionDsl<TState, TInput>
+public class TransitionDsl<TState, TInput>(TState targetState, Predicate<TInput> predicate)
 {
-    public TState TargetState { get; }
-    public Predicate<TInput> Predicate { get; }
-
-    public TransitionDsl(TState targetState, Predicate<TInput> predicate)
-    {
-        TargetState = targetState;
-        Predicate = predicate;
-    }
+    public TState TargetState { get; } = targetState;
+    public Predicate<TInput> Predicate { get; } = predicate;
 }

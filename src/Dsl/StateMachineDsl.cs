@@ -12,17 +12,17 @@ public class StateMachineDsl<TState, TInput, TOutput> where TState:notnull
     private StateMachineDsl(TState initialState)
     {
         InitialStateId = initialState;
-        DefinedStates = new List<StateDef<TState, TInput, TOutput>>();
+        DefinedStates = [];
     }
 
     public static StateMachineDsl<TState, TInput, TOutput> StateMachine(TState initialState)
     {
-        return new(initialState);
+        return new StateMachineDsl<TState, TInput, TOutput>(initialState);
     }
 
     public StateDsl<TState, TInput, TOutput> State(TState stateId)
     {
-        return new(stateId, this);
+        return new StateDsl<TState, TInput, TOutput>(stateId, this);
     }
         
 
@@ -33,7 +33,7 @@ public class StateMachineDsl<TState, TInput, TOutput> where TState:notnull
 
     internal StateDef<TState, TInput, TOutput>? GetDefinedState(TState stateId)
     {
-        return DefinedStates.FirstOrDefault(s => stateId!.Equals(s.Id));
+        return DefinedStates.FirstOrDefault(s => stateId.Equals(s.Id));
     }
 
 
