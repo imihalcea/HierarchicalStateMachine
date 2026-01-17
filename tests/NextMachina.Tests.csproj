@@ -8,6 +8,7 @@
     <LangVersion>default</LangVersion>
 
     <RootNamespace>NextMachina.Tests</RootNamespace>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
