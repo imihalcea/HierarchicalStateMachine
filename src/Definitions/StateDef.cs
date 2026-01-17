@@ -5,24 +5,14 @@ using System.Linq;
 
 namespace NextMachina.Definitions;
 
-public class StateDef<TState, TInput, TOutput> : IEquatable<StateDef<TState, TInput, TOutput>> where TState:notnull
+public class StateDef<TState, TInput, TOutput>(TState id) : IEquatable<StateDef<TState, TInput, TOutput>>
+    where TState : notnull
 {
-    private readonly List<StateDef<TState, TInput, TOutput>> _children;
+    private readonly List<StateDef<TState, TInput, TOutput>> _children = new();
     private StateDef<TState, TInput, TOutput>? _parent;
-    private readonly List<TransitionDef<TState, TInput>> _transitions;
+    private readonly List<TransitionDef<TState, TInput>> _transitions = new();
 
-    public StateDef(TState id)
-    {
-        Id = id;
-        _children = new List<StateDef<TState, TInput, TOutput>>();
-        OnExit = new BehaviourDef<TInput, TOutput>([]);
-        OnEntry = new BehaviourDef<TInput, TOutput>([]);
-        OnState = new BehaviourDef<TInput, TOutput>([]);
-        _transitions = new List<TransitionDef<TState, TInput>>();
-
-    }
-
-    public TState Id { get; internal set; }
+    public TState Id { get; } = id;
 
     public bool IsInitialSubState { get; internal set; }
 
@@ -45,11 +35,11 @@ public class StateDef<TState, TInput, TOutput> : IEquatable<StateDef<TState, TIn
         return this;
     }
 
-    public BehaviourDef<TInput, TOutput> OnEntry { get; internal set; }
+    public BehaviourDef<TInput, TOutput> OnEntry { get; internal set; } = new([]);
 
-    public BehaviourDef<TInput, TOutput> OnExit { get; internal set; }
+    public BehaviourDef<TInput, TOutput> OnExit { get; internal set; } = new([]);
 
-    public BehaviourDef<TInput, TOutput> OnState { get; internal set; }
+    public BehaviourDef<TInput, TOutput> OnState { get; internal set; } = new([]);
 
     public BehaviourDef<TInput, TOutput> InheritedBehaviour(Func<StateDef<TState, TInput, TOutput>, BehaviourDef<TInput, TOutput>> f)
     {
@@ -117,6 +107,4 @@ public class StateDef<TState, TInput, TOutput> : IEquatable<StateDef<TState, TIn
     {
         _transitions.AddRange(transitions);
     }
-
-
 }

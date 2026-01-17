@@ -4,17 +4,13 @@ using System.Linq;
 
 namespace NextMachina.Definitions;
 
-public class BehaviourDef<TInput, TOutput>
+public class BehaviourDef<TInput, TOutput>(IReadOnlyList<Func<TInput, TOutput>> funcs)
 {
-    public BehaviourDef(IReadOnlyList<Func<TInput, TOutput>> funcs)
-    {
-        Funcs = funcs;
-    }
-
-    public IReadOnlyList<Func<TInput, TOutput>> Funcs { get; }
+    public IReadOnlyList<Func<TInput, TOutput>> Funcs { get; } = funcs;
 
     public BehaviourDef<TInput, TOutput> Concat(BehaviourDef<TInput, TOutput>? executionDef)
     {
-        return new(Funcs.Concat(executionDef?.Funcs??Array.Empty<Func<TInput,TOutput>>()).ToArray());
+        return new BehaviourDef<TInput, TOutput>(
+            Funcs.Concat(executionDef?.Funcs??[]).ToArray());
     }
 }
