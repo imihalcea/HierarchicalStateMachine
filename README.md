@@ -14,42 +14,142 @@ A lightweight and flexible C# library for implementing hierarchical state machin
 
 The project is a .NET standard solution. You can integrate it directly into your solution or reference the `NextMachina` project.
 
-## Usage Example
+## Usage Examples
 
-Here is a simple example showing how to define and use a state machine.
+### 1. Simple State Machine: Turnstile
+
+This example models a simple turnstile that can be Locked or Unlocked.
+
+#### Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Locked
+    Locked --> Unlocked : InsertCoin
+    Unlocked --> Locked : Push
+    Locked --> Locked : Push (Error)
+    Unlocked --> Unlocked : InsertCoin (Refund)
+```
+
+#### Code
 
 ```csharp
 using NextMachina.Engine;
-using static NextMachina.Dsl.StateMachineDsl<MyStateEnum, int, string>;
-using static NextMachina.Dsl.TransitionState<MyStateEnum, int>;
+using static NextMachina.Dsl.StateMachineDsl<TurnstileState, TurnstileInput, string>;
+using static NextMachina.Dsl.TransitionState<TurnstileState, TurnstileInput>;
 
-// 1. Define your states (e.g., with an Enum)
-public enum MyStateEnum { Idle, Working, Paused }
+public enum TurnstileState { Locked, Unlocked }
+public enum TurnstileInput { InsertCoin, Push }
 
-// 2. Create the state machine via the DSL
-var stateMachine = StateMachine(MyStateEnum.Idle)
-    .State(MyStateEnum.Idle)
+var turnstileMachine = StateMachine(TurnstileState.Locked)
+    .State(TurnstileState.Locked)
         .Transitions(
-            To(MyStateEnum.Working).When(input => input == 1)
+            To(TurnstileState.Unlocked).When(input => input == TurnstileInput.InsertCoin)
         )
-    .State(MyStateEnum.Working)
-        .OnEntry(input => "Started working")
-        .OnExit(input => "Stopped working")
+        .OnEntry(_ => "Locked")
+    .State(TurnstileState.Unlocked)
         .Transitions(
-            To(MyStateEnum.Paused).When(input => input == 0),
-            To(MyStateEnum.Idle).When(input => input == -1)
+            To(TurnstileState.Locked).When(input => input == TurnstileInput.Push)
         )
-    .State(MyStateEnum.Paused)
-        .Transitions(
-            To(MyStateEnum.Working).When(input => input == 1)
-        )
+        .OnEntry(_ => "Unlocked")
     .BuildDefinition()
     .Create();
 
-// 3. Use the state machine
-// TransitionFrom takes the current state and an input, and returns the new state and any outputs.
-var (nextState, outputs) = stateMachine.TransitionFrom(MyStateEnum.Idle, 1);
-// nextState will be MyStateEnum.Working
+// Usage
+var (newState, outputs) = turnstileMachine.TransitionFrom(TurnstileState.Locked, TurnstileInput.InsertCoin);
+// newState is TurnstileState.Unlocked
+```
+
+### 2. Hierarchical State Machine: Order Processing
+
+This example demonstrates composite states. The `Processing` state contains sub-states (`Validating`, `Payment`, `Packing`). A transition from the parent state `Processing` (e.g., `Cancel`) applies to all its sub-states.
+
+#### Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> New
+    New --> Processing : Submit
+    
+    state Processing {
+        [*] --> Validating
+        Validating --> Payment : Approve
+        Payment --> Packing : Pay
+    }
+    
+    Processing --> Shipped : Ship (from Packing)
+    Processing --> Cancelled : Cancel (Global)
+    
+    Shipped --> [*]
+    Cancelled --> [*]
+```
+
+#### Code
+
+```csharp
+using NextMachina.Engine;
+using static NextMachina.Dsl.StateMachineDsl<OrderState, OrderEvent, string>;
+using static NextMachina.Dsl.TransitionState<OrderState, OrderEvent>;
+
+public enum OrderState 
+{ 
+    New, 
+    Processing, 
+        Validating, 
+        Payment, 
+        Packing, 
+    Shipped, 
+    Cancelled 
+}
+
+public enum OrderEvent { Submit, Approve, Pay, Packed, Ship, Cancel }
+
+var orderStateMachine = StateMachine(OrderState.New)
+    .State(OrderState.New)
+        .Transitions(
+            To(OrderState.Processing).When(evt => evt == OrderEvent.Submit)
+        )
+    
+    // Composite State: Processing
+    .State(OrderState.Processing)
+        // Global transition: If 'Cancel' is received while in ANY sub-state of Processing, go to Cancelled
+        .Transitions(
+            To(OrderState.Cancelled).When(evt => evt == OrderEvent.Cancel)
+        )
+    
+    // Sub-states of Processing
+    .State(OrderState.Validating).InitialSubStateOf(OrderState.Processing)
+        .Transitions(
+            To(OrderState.Payment).When(evt => evt == OrderEvent.Approve)
+        )
+    .State(OrderState.Payment).SubStateOf(OrderState.Processing)
+        .Transitions(
+            To(OrderState.Packing).When(evt => evt == OrderEvent.Pay)
+        )
+    .State(OrderState.Packing).SubStateOf(OrderState.Processing)
+        .Transitions(
+            To(OrderState.Shipped).When(evt => evt == OrderEvent.Ship)
+        )
+        
+    .State(OrderState.Shipped)
+    .State(OrderState.Cancelled)
+    .BuildDefinition()
+    .Create();
+
+// Usage Scenario 1: Normal Flow
+// New -> Processing (enters Validating)
+var (s1, _) = orderStateMachine.TransitionFrom(OrderState.New, OrderEvent.Submit); 
+// s1 is OrderState.Validating
+
+// Validating -> Payment
+var (s2, _) = orderStateMachine.TransitionFrom(s1, OrderEvent.Approve);
+// s2 is OrderState.Payment
+
+// Usage Scenario 2: Cancellation from sub-state
+// Assume we are in Payment state
+// Payment -> Cancelled (handled by parent Processing state)
+var (s3, _) = orderStateMachine.TransitionFrom(OrderState.Payment, OrderEvent.Cancel);
+// s3 is OrderState.Cancelled
 ```
 
 ## Project Structure
