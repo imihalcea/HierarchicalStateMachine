@@ -1,11 +1,10 @@
 using System;
 
-namespace NextMachina.Definitions
+namespace NextMachina.Definitions;
+
+public class TransitionDef<TState, TInput> where TState:notnull
 {
-    public class TransitionDef<TState, TInput> where TState:notnull
-    {
-        public TState From { get; internal set; }
-        public TState To { get; internal set; }
-        public Predicate<TInput> Predicate { get; internal set; }
-    }
+    public required TState From { get; set; }
+    public required TState To { get; set; }
+    public required Predicate<TInput> Predicate { get; set; }
 }
