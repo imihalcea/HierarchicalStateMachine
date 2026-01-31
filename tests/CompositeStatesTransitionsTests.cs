@@ -31,7 +31,7 @@ public class CompositeStatesTransitionsTests
         
     private static IStateMachine<State, int, int> CreateStateMachine()
     {
-        return StateMachine(O)
+        return StateMachine(initialState:O)
             .State(O)
             .Transitions(
                 To(A).When(i=>i==0),

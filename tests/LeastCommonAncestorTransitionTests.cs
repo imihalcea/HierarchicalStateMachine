@@ -41,7 +41,7 @@ public class LeastCommonAncestorTransitionTests
         // A = Child 1
         // B = Child 2
             
-        return StateMachine(A)
+        return StateMachine(initialState:A)
             .State(C) // Parent
             .OnEntry(_ => "Entry Parent")
             .OnExit(_ => "Exit Parent")

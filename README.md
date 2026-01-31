@@ -41,7 +41,7 @@ using static NextMachina.Dsl.TransitionState<TurnstileState, TurnstileInput>;
 public enum TurnstileState { Locked, Unlocked }
 public enum TurnstileInput { InsertCoin, Push }
 
-var turnstileMachine = StateMachine(TurnstileState.Locked)
+var turnstileMachine = StateMachine(initialState:TurnstileState.Locked)
     .State(TurnstileState.Locked)
         .Transitions(
             To(TurnstileState.Unlocked).When(input => input == TurnstileInput.InsertCoin)
@@ -104,7 +104,7 @@ public enum OrderState
 
 public enum OrderEvent { Submit, Approve, Pay, Packed, Ship, Cancel }
 
-var orderStateMachine = StateMachine(OrderState.New)
+var orderStateMachine = StateMachine(initialState:OrderState.New)
     .State(OrderState.New)
         .Transitions(
             To(OrderState.Processing).When(evt => evt == OrderEvent.Submit)

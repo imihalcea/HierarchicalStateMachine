@@ -15,7 +15,7 @@ public class StateMachineTransitionTests
     [TestCase(B, 0, B)]
     public void state_changes_when_predicate_is_matching(State from, int input, State expected)
     {
-        var sm = StateMachine(A)
+        var sm = StateMachine(initialState:A)
             .State(A)
             .Transitions(
                 To(B).When(i=>i>=0 && i%2==0),
@@ -42,7 +42,7 @@ public class StateMachineTransitionTests
     [TestCase(B, 3, B, new[]{9,12})]
     public void execute_transition_functions(State currentState, int input, State expectedState, int[] expectedOutput)
     {
-        var sm = StateMachine(A)
+        var sm = StateMachine(initialState:A)
             .State(A)
             .OnExit(i=>i*10)
             .OnState(i=>i*2)
